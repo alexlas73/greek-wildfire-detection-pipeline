@@ -1,0 +1,5 @@
+config,model,shot,bin_F2,bin_recall,bin_acc,bin_lat_s,bin_usd_per_1k,multi_macroF1,multi_exact,multi_lat_s
+claude_zero,claude-sonnet-4-5,zero,0.7503,0.7576,0.8211,1.281,1.4473,0.4842,0.5697,1.317
+claude_few,claude-sonnet-4-5,few,0.7439,0.7394,0.8354,1.076,3.6374,0.519,0.5879,1.263
+llama_zero,meta-llama/Llama-3.3-70B-Instruct,zero,0.7218,0.7455,0.7744,1.13,0.0886,0.3938,0.4242,1.925
+llama_few,meta-llama/Llama-3.3-70B-Instruct,few,0.7407,0.7515,0.8089,1.281,0.2475,0.3586,0.3758,1.767

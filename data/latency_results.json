@@ -1,0 +1,22 @@
+{
+  "hardware": {
+    "device": "cpu",
+    "gpu": "CPU only",
+    "torch": "2.11.0+cpu",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35"
+  },
+  "binary_greekbert": {
+    "model": "mariossmrs/greek-bert-fire-detection-binary-classification",
+    "n": 492,
+    "single_item_latency_s_mean": 0.4905,
+    "single_item_latency_s_median": 0.4544,
+    "batched_latency_s_per_item": 0.38
+  },
+  "multilabel_xlmr": {
+    "model": "mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification",
+    "n": 165,
+    "single_item_latency_s_mean": 0.4253,
+    "single_item_latency_s_median": 0.3897,
+    "batched_latency_s_per_item": 0.3731
+  }
+}

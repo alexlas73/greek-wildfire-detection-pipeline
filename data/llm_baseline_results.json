@@ -1,0 +1,126 @@
+{
+  "claude_zero": {
+    "model": "claude-sonnet-4-5",
+    "shot": "zero",
+    "binary": {
+      "accuracy": 0.8211,
+      "precision": 0.7225,
+      "recall": 0.7576,
+      "f1": 0.7396,
+      "f2": 0.7503,
+      "latency_s_per_item": 1.281,
+      "cost": {
+        "input_tokens": 196536,
+        "output_tokens": 8164,
+        "total_usd": 0.7121,
+        "usd_per_1000_items": 1.4473
+      }
+    },
+    "multilabel": {
+      "exact_match": 0.5697,
+      "macro_precision": 0.5428,
+      "macro_recall": 0.5311,
+      "macro_f1": 0.4842,
+      "latency_s_per_item": 1.317,
+      "cost": {
+        "input_tokens": 65855,
+        "output_tokens": 4320,
+        "total_usd": 0.2624,
+        "usd_per_1000_items": 1.5901
+      }
+    }
+  },
+  "claude_few": {
+    "model": "claude-sonnet-4-5",
+    "shot": "few",
+    "binary": {
+      "accuracy": 0.8354,
+      "precision": 0.7625,
+      "recall": 0.7394,
+      "f1": 0.7508,
+      "f2": 0.7439,
+      "latency_s_per_item": 1.076,
+      "cost": {
+        "input_tokens": 569472,
+        "output_tokens": 5412,
+        "total_usd": 1.7896,
+        "usd_per_1000_items": 3.6374
+      }
+    },
+    "multilabel": {
+      "exact_match": 0.5879,
+      "macro_precision": 0.5882,
+      "macro_recall": 0.5975,
+      "macro_f1": 0.519,
+      "latency_s_per_item": 1.263,
+      "cost": {
+        "input_tokens": 212540,
+        "output_tokens": 3300,
+        "total_usd": 0.6871,
+        "usd_per_1000_items": 4.1644
+      }
+    }
+  },
+  "llama_zero": {
+    "model": "meta-llama/Llama-3.3-70B-Instruct",
+    "shot": "zero",
+    "binary": {
+      "accuracy": 0.7744,
+      "precision": 0.6406,
+      "recall": 0.7455,
+      "f1": 0.6891,
+      "f2": 0.7218,
+      "latency_s_per_item": 1.13,
+      "cost": {
+        "input_tokens": 120045,
+        "output_tokens": 3936,
+        "total_usd": 0.0436,
+        "usd_per_1000_items": 0.0886
+      }
+    },
+    "multilabel": {
+      "exact_match": 0.4242,
+      "macro_precision": 0.5025,
+      "macro_recall": 0.5167,
+      "macro_f1": 0.3938,
+      "latency_s_per_item": 1.925,
+      "cost": {
+        "input_tokens": 45302,
+        "output_tokens": 2970,
+        "total_usd": 0.017,
+        "usd_per_1000_items": 0.1033
+      }
+    }
+  },
+  "llama_few": {
+    "model": "meta-llama/Llama-3.3-70B-Instruct",
+    "shot": "few",
+    "binary": {
+      "accuracy": 0.8089,
+      "precision": 0.7006,
+      "recall": 0.7515,
+      "f1": 0.7251,
+      "f2": 0.7407,
+      "latency_s_per_item": 1.281,
+      "cost": {
+        "input_tokens": 343413,
+        "output_tokens": 3936,
+        "total_usd": 0.1218,
+        "usd_per_1000_items": 0.2475
+      }
+    },
+    "multilabel": {
+      "exact_match": 0.3758,
+      "macro_precision": 0.5297,
+      "macro_recall": 0.5033,
+      "macro_f1": 0.3586,
+      "latency_s_per_item": 1.767,
+      "cost": {
+        "input_tokens": 140012,
+        "output_tokens": 2970,
+        "total_usd": 0.0502,
+        "usd_per_1000_items": 0.3042
+      }
+    }
+  }
+}
