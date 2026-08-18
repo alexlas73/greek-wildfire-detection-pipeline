@@ -1,10 +1,10 @@
 Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping
 
-Wildfires are increasing around the world, and usually the first sign of a fire is a citi-zen's social media posting, not a satellite. This paper conceptualizes "Citizens as sen-sors" as a complete, operational system: an end-to-end, Greek-language NLP pipeline that transforms raw, unlabeled X posts into a live, geolocated wildfire map, with no human intervention at inference. The pipeline identifies active fires, categorizes them as wildland, urban, or mixed, resolves the referenced toponym, and groups fire reports into incident zones on an interactive, time-sliced satellite map. On a corpus of 3,277 manu-ally annotated Greek posts, validated by a formal inter-annotator audit (Cohen's κ = 0.978), fine-tuned transformers achieved F2 = 0.911 for fire detection and macro-F1 = 0.874 for fire-type classification, decisively outperforming two LLMs and classical base-lines on the same test sets, while being more accurate, over twice as fast, and free of per-call cost. Spatiotemporal toponym disambiguation raised geocoding accuracy from 54.68% to 80.58% (p < 0.001), and a later repeatability test revealed measurable gazetteer drift. Applied to raw posts from 12 August 2024, the pipeline automatically identified and mapped a major Attica wildfire in near real time, resolving hundreds of citizen re-ports into a single incident cluster.
+Wildfires are increasing around the world, and usually the first sign of a fire is a citizen's social media posting, not a satellite. This paper conceptualizes "Citizens as sen-sors" as a complete, operational system: an end-to-end, Greek-language NLP pipeline that transforms raw, unlabeled X posts into a live, geolocated wildfire map, with no human intervention at inference. The pipeline identifies active fires, categorizes them as wildland, urban, or mixed, resolves the referenced toponym, and groups fire reports into incident zones on an interactive, time-sliced satellite map. On a corpus of 3,277 manu-ally annotated Greek posts, validated by a formal inter-annotator audit (Cohen's κ = 0.978), fine-tuned transformers achieved F2 = 0.911 for fire detection and macro-F1 = 0.874 for fire-type classification, decisively outperforming two LLMs and classical base-lines on the same test sets, while being more accurate, over twice as fast, and free of per-call cost. Spatiotemporal toponym disambiguation raised geocoding accuracy from 54.68% to 80.58% (p < 0.001), and a later repeatability test revealed measurable gazetteer drift. Applied to raw posts from 12 August 2024, the pipeline automatically identified and mapped a major Attica wildfire in near real time, resolving hundreds of citizen re-ports into a single incident cluster.
 
 # Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21982027.svg)](https://doi.org/10.5281/zenodo.21982027)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
@@ -59,7 +59,7 @@ greek-wildfire-detection-pipeline/
 └── README.md
 ```
 
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; the original text can be re-collected using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
+> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
 
 ---
 
