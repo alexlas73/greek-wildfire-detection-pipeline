@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite both the software and the associated paper."
+type: software
+title: "greek-wildfire-detection-pipeline"
+version: "2.2"
+date-released: "2026-09-24"
+doi: "10.5281/zenodo.21991636"
+repository-code: "https://github.com/alexlas73/greek-wildfire-detection-pipeline"
+license: "CC-BY-4.0"
+authors:
+  - family-names: Lazanas
+    given-names: Alexios
+    affiliation: "Department of Mechanical Engineering and Aeronautics, University of Patras"
+    email: alexlas@upatras.gr
+  - family-names: Samaras
+    given-names: Marios
+    affiliation: "Department of Mechanical Engineering and Aeronautics, University of Patras"
+keywords:
+  - wildfire detection
+  - social sensing
+  - Greek NLP
+  - GreekBERT
+  - XLM-RoBERTa
+  - geoparsing
+  - toponym disambiguation
+preferred-citation:
+  type: article
+  title: "People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media"
+  authors:
+    - family-names: Lazanas
+      given-names: Alexios
+    - family-names: Samaras
+      given-names: Marios
+  journal: "AI"
+  publisher:
+    name: "MDPI"
+  year: 2026
+  notes: "under review"

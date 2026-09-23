@@ -1,535 +1,184 @@
-Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping
-
-Wildfires are increasing around the world, and usually the first sign of a fire is a citizen's social media posting, not a satellite. This paper conceptualizes "Citizens as sen-sors" as a complete, operational system: an end-to-end, Greek-language NLP pipeline that transforms raw, unlabeled X posts into a live, geolocated wildfire map, with no human intervention at inference. The pipeline identifies active fires, categorizes them as wildland, urban, or mixed, resolves the referenced toponym, and groups fire reports into incident zones on an interactive, time-sliced satellite map. On a corpus of 3,277 manu-ally annotated Greek posts, validated by a formal inter-annotator audit (Cohen's κ = 0.978), fine-tuned transformers achieved F2 = 0.911 for fire detection and macro-F1 = 0.874 for fire-type classification, decisively outperforming two LLMs and classical base-lines on the same test sets, while being more accurate, over twice as fast, and free of per-call cost. Spatiotemporal toponym disambiguation raised geocoding accuracy from 54.68% to 80.58% (p < 0.001), and a later repeatability test revealed measurable gazetteer drift. Applied to raw posts from 12 August 2024, the pipeline automatically identified and mapped a major Attica wildfire in near real time, resolving hundreds of citizen re-ports into a single incident cluster.
-
-# Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
+# People as Sensors: Greek-Language Wildfire Detection Pipeline
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
+End-to-end, Greek-language NLP pipeline that turns keyword-retrieved, unlabeled X posts into a near-real-time, geolocated wildfire map: active-fire detection → fire-type classification (wildland / urban / mixed) → toponym extraction and spatiotemporal disambiguation → DBSCAN incident clustering → interactive Folium map.
 
-> **Associated paper:** Lazanas, A.; Samaras, M. Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping. *AI* 2026 (MDPI, JCR Q1). # Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
+> **Associated paper:** Lazanas, A.; Samaras, M. *People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media.* **AI** (MDPI), 2026, under review.
+>
+> **Interactive demonstration map (12 August 2024, NE Attica):** https://alexlas73.github.io/FireMap/
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-
-End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
-
-> **Associated paper:** Lazanas, A.; Samaras, M. Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping. *AI* 2026 (MDPI, JCR Q1). # Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-
-End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
-
-> **Associated paper:** Lazanas, A.; Samaras, M. Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping. *AI* 2026 (MDPI, JCR Q1). https://doi.org/10.5281/zenodo.21991636
+**Release v2.2 (September 2026)** adds the material of the revised manuscript: chronological hold-out evaluation (§4.8), DBSCAN sensitivity analysis and comparison with the official 112 warnings (§4.7), near-duplicate leakage analysis (§3.4.3), the full inter-annotator agreement (IAA) package (§3.2.3, §4.1), the annotation guidelines, and a corrected data release (see *Data* below).
 
 ---
 
-## Pipeline Overview
+## Pipeline overview
 
 ```
-Raw X posts
+Keyword-retrieved X posts (Twikit)
     │
     ▼
-Part 1 · Scraping          (Twikit)
+Part 2 · Text cleaning            light → advanced → hard
     │
     ▼
-Part 2 · Text Cleaning     (4 levels: light → advanced → hard)
+Part 3 · Active-fire detection    GreekBERT (binary)        F2 = 0.911 (random split) · 0.850 (chronological hold-out)
     │
     ▼
-Part 3 · Binary Classification    GreekBERT  →  F2 = 0.911
-    │         (active fire?)
+Part 4 · Fire-type classification XLM-RoBERTa (multilabel)  macro-F1 = 0.874 (random) · 0.769 ± 0.085 (hold-out)
+    │
     ▼
-Part 4 · Multilabel Classification    XLM-RoBERTa  →  Macro-F1 = 0.874
-    │         (wildland / urban / mixed)
+Part 5 · Geoparsing & mapping     GR-NLP-TOOLKIT NER → Nominatim → spatiotemporal memory (5 h, 40/20 km)
+    │                              → DBSCAN (ε = 15 km, minPts = 2) → Folium map
     ▼
-Part 5 · Geoparsing & Mapping   NER → Nominatim → spatiotemporal disambiguation
-    │         →  DBSCAN clustering (ε = 15 km)  →  Folium interactive map
-    ▼
-Part 6 · Simulation        (end-to-end demo on Varnavas/Attica 2024 fire)
+Part 6 · End-to-end replay        unlabeled stream of 12 August 2024 (2,000 posts)
 ```
+
+`figures/fig_sequence_diagram.png` shows the inference sequence for one post (paper Figure 2).
 
 ---
 
-## Repository Structure
+## Repository structure
 
 ```
 greek-wildfire-detection-pipeline/
-├── part1_x_scraping.py               # X (Twitter) post collection via Twikit
-├── part2_text_cleaning.py            # Greek text normalisation (4 levels)
-├── part3_binary_classification.py    # Active-fire binary classifier (GreekBERT / SVM)
-├── part4_multilabel_classification.py# Fire-type multilabel classifier (XLM-RoBERTa / SVM)
-├── part5_geoparsing_and_mapping.py   # NER + disambiguation + DBSCAN + Folium map
-├── part6_simulation.py               # End-to-end simulation on unlabelled posts
-├── data/
-│   ├── tweet_ids.txt                 # Post IDs for corpus re-hydration (raw text not distributed)
-│   ├── ground_truth_geoparsing.xlsx  # 147-item geoparsing gold standard
-│   ├── ground_truth_classification.xlsx  # Post-level binary + multilabel labels
-│   ├── IAA_results.json              # Inter-annotator agreement scores
-│   ├── IAA_adjudication.json         # Adjudication outcomes
-│   └── ANNOTATION_GUIDELINES.md     # Full annotation protocol
-└── README.md
+├── scripts/
+│   ├── part1_x_scraping.py                 X post collection via Twikit
+│   ├── part2_text_cleaning.py              Greek text normalisation (three levels)
+│   ├── part3_binary_classification.py      Active-fire classifier (SVM / GreekBERT / XLM-RoBERTa)
+│   ├── part4_multilabel_classification.py  Fire-type classifier (SVM / GreekBERT / XLM-RoBERTa)
+│   ├── part5_geoparsing_and_mapping.py     NER → geocoding → disambiguation → DBSCAN → Folium
+│   └── part6_simulation.py                 End-to-end replay on an unlabeled stream
+├── analysis/                               Scripts reproducing the paper's evaluation (table below)
+├── data/                                   Corpus, gold standards, IAA package, results (see Data)
+├── docs/ANNOTATION_GUIDELINES.md           Annotation protocol used for the corpus and the IAA audit
+├── figures/                                Paper figures
+├── Click_to_see_Fire_Map.html              Redirect to the interactive map
+├── CITATION.cff
+└── LICENSE
 ```
-
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
 
 ---
 
-## Pre-trained Models
+## Data
 
-Both fine-tuned models are publicly available on Hugging Face:
+All files are in `data/`. **No usernames are distributed; in-text `@mentions` are replaced by `@user` in every file.**
+
+### Annotated corpus (paper §3.2)
+
+| File | Content |
+|---|---|
+| `master_cleaned_dataset.csv` | 3,277 posts, 3 July 2024 – 21 September 2025: `Date`, `Tweet_ID`, `Tweet_ID_precision`, `snowflake_time_utc`, `Raw Text`, `Likes`, `Retweets`, labels `is_fire`, `is_wildland`, `is_urban`, and the three cleaned-text columns. 1,100 posts are active-fire posts (`is_fire = 1`); fire type is encoded as (`is_wildland`, `is_urban`) = wildland (1,0), urban (0,1), mixed (1,1), unidentified (0,0). |
+| `ground_truth_classification.xlsx` | The same posts and labels in spreadsheet form (kept for continuity with v2.0/v2.1). |
+| `ground_truth_geoparsing.xlsx` | Geoparsing gold standard: 147 toponyms in 100 posts with gold toponym and coordinates (§3.5.3, §4.5). |
+
+> **Post identifiers of the annotated corpus are approximate.** The corpus passed through a spreadsheet at annotation time, and spreadsheet software stores 19-digit integers as double-precision floats, which rounds an X post ID to the nearest multiple of 256. The original scrape files no longer exist, so every `Tweet_ID` in `master_cleaned_dataset.csv`, `ground_truth_*.xlsx`, the IAA files and the hold-out results is within ±128 of the true identifier (`Tweet_ID_precision = approx_pm128`). The timestamp encoded in the upper bits of the identifier is unaffected and is given to the millisecond in `snowflake_time_utc`. Identifiers are consistent *within* this release, so all joins between files work; they cannot be used directly as `x.com/i/status/<id>` links. The identifiers of the 2,000-post demonstration stream are exact (`Tweet_ID_precision = exact`).
+
+### Demonstration stream (paper §4.7)
+
+| File | Content |
+|---|---|
+| `raw_tweets_for_simulation.csv` | 2,000 unlabeled posts of 12 August 2024, 19:04–23:58 UTC (exact identifiers). Input of `scripts/part6_simulation.py`. |
+| `simulation_predicted_tweets.csv` | Output of Parts 3–4 on the stream (fire probability, predicted labels). |
+| `fire_events_geoparsed.csv` | Output of Part 5: the 434 posts with at least one resolved toponym; 600 geolocated mentions with coordinates and OSM metadata. |
+| `112_alerts_matching.csv` | The ten public-warning (112) messages issued for the fire, 11–13 August 2024, matched to the earliest corpus/stream post naming each locality (area-level recall 8/9). |
+| `dbscan_sensitivity.csv` | Clustering outcome for ε ∈ {5, 10, 15, 20, 30} km × minPts ∈ {2, 3, 5}. |
+
+### Inter-annotator agreement package (paper §3.2.3, §4.1)
+
+| File | Content |
+|---|---|
+| `IAA_sampling_metadata.json` | Sampling design (seed 20260810; 400 binary, 300 multilabel with the mixed class over-sampled, all 147 geoparsing items). |
+| `IAA_worksheet_ANNOTATOR2.xlsx` | The blind worksheets as filled in by the second annotator (three sheets). |
+| `IAA_key_annotator1.xlsx` | First-annotator labels for the same rows (the sealed key of the audit). |
+| `IAA_results.json`, `IAA_geoparsing_setbased.json` | Cohen's κ, Krippendorff's α, bootstrap CIs; set-based (Jaccard) and distance agreement for geoparsing. |
+| `IAA_disagreements_*.xlsx` | The 4 binary, 6 multilabel and the geoparsing disagreements. |
+| `IAA_adjudication.json` | Adjudication outcome (1 of 700 audited labels revised) and the two clarified coding rules. |
+| `docs/ANNOTATION_GUIDELINES.md` | The written protocol given to the second annotator. |
+
+### Evaluation outputs
+
+| File / folder | Paper section |
+|---|---|
+| `leakage_analysis_summary.csv`, `leakage_analysis_results.json` | §3.4.3 near-duplicate posts across splits |
+| `llm_baseline_results.csv/.json`, `latency_results.json` | §4.4 LLM baselines, latency and cost |
+| `geoparse_errors.csv` | §4.5 per-toponym error of base vs. disambiguated geocoding |
+| `sensitivity_results.csv`, `nominatim_drift.csv` | §4.6 threshold sensitivity; gazetteer drift re-run |
+| `holdout_binary/`, `holdout_multilabel/` | §4.8 random vs. chronological hold-out: per-seed metrics (`summary_*`), per-post test probabilities (`probs_*`, five seeds × two models × two splits), misclassified posts (`errors_*`), bootstrap CIs (`results_*.json`), paired bootstrap of the GreekBERT–XLM-RoBERTa difference |
+
+---
+
+## Pre-trained models
 
 | Task | Model | Hugging Face ID |
 |---|---|---|
-| Binary (active fire?) | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
-| Multilabel (fire type) | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
+| Active-fire detection | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
+| Fire-type classification | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
 
 ---
 
 ## Requirements
 
-Python 3.10+ recommended. Install all dependencies:
+Python 3.10+. The classification scripts were run on Google Colab (GPU) with pinned versions:
 
 ```bash
-pip install twikit transformers datasets torch scikit-learn \
-            gr-nlp-toolkit spacy geopy folium emoji \
-            pandas openpyxl matplotlib
+pip install "transformers==4.46.3" "datasets==3.1.0" "accelerate==1.1.1" torch scikit-learn \
+            gr-nlp-toolkit spacy geopy folium emoji pandas openpyxl matplotlib twikit
 python -m spacy download el_core_news_lg
 ```
 
-> **GPU:** Parts 3, 4, and 6 run substantially faster on a CUDA-enabled GPU. The pipeline is functional on CPU (Parts 3 and 4 take ~0.5 s/post on CPU; ~5–10× faster on GPU).
+> Parts 3, 4 and the hold-out scripts need a GPU for reasonable run times (≈ 4 min per seed and model on a T4). Part 5 queries the public Nominatim instance at 1 request/s; results depend on the state of the gazetteer on the day of the run (paper §4.6).
 
 ---
 
-## Quickstart: Reproduce the Paper's Results
+## Reproducing the paper
 
-### 1. Clone the repository
+Run everything from the repository root.
 
-```bash
-git clone https://github.com/alexlas73/greek-wildfire-detection-pipeline.git
-cd greek-wildfire-detection-pipeline
-```
-
-### 2. Re-hydrate the corpus (optional)
-
-If you have X API access, re-collect the post text using the IDs in `data/tweet_ids.txt`. Place the resulting dataset at `data/master_cleaned_dataset.xlsx` (see column schema in the annotation guidelines).
-
-### 3. Run binary classification
-
-```bash
-python part3_binary_classification.py
-```
-
-Trains and evaluates GreekBERT and baseline SVMs on the 70/15/15 stratified split (seed 42). Outputs per-seed metrics across 5 runs.
-
-### 4. Run multilabel classification
-
-```bash
-python part4_multilabel_classification.py
-```
-
-Trains and evaluates XLM-RoBERTa on active-fire posts only, with per-label threshold tuning (seed 789).
-
-### 5. Run geoparsing and mapping
-
-```bash
-python part5_geoparsing_and_mapping.py
-```
-
-Evaluates geoparsing on the 147-item gold standard; generates the interactive Folium map (`fire_events_map.html`).
-
-### 6. Run the end-to-end simulation
-
-```bash
-python part6_simulation.py
-```
-
-Processes the August 2024 Attica fire dataset end-to-end and produces `fire_events_geoparsed.csv` and `fire_events_map.html`.
-
----
-
-## Reproducing Additional Experiments
-
-The following analysis scripts reproduce the paper's supplementary experiments. Run them from the repo root after completing Steps 3–5 above:
-
-| Script | Experiment | Section |
+| Step | Script | Paper |
 |---|---|---|
-| `analysis/iaa_compute.py` | Inter-annotator agreement (Cohen's κ, Krippendorff's α) | §4.1 |
-| `analysis/leakage_analysis.py` | Near-duplicate leakage check across splits | §3.4.3 |
-| `analysis/sensitivity_analysis.py` | One-at-a-time threshold sensitivity sweep | §4.6 |
-| `analysis/nominatim_drift_check.py` | Gazetteer drift quantification | §4.6 |
-| `analysis/llm_baselines.py` | LLM baseline comparison (Claude + Llama) | §4.4 |
-| `analysis/latency_benchmark.py` | Per-post inference latency measurement | §4.4 |
+| Classification, random split | `scripts/part3_binary_classification.py`, `scripts/part4_multilabel_classification.py` | §4.2, §4.3 |
+| Chronological hold-out (both splits, five seeds, CIs, paired bootstrap) | `analysis/holdout_binary.py`, `analysis/holdout_multilabel.py` | §4.8, Tables 7–8 |
+| LLM baselines and latency | `analysis/llm_baselines_v3.py`, `analysis/latency_benchmark.py` (needs `ANTHROPIC_API_KEY`, `DEEPINFRA_API_KEY`) | §4.4 |
+| Inter-annotator agreement | `analysis/iaa_sample.py` (draws the blind worksheets), `analysis/iaa_compute.py` | §4.1 |
+| Near-duplicate leakage | `analysis/leakage_analysis.py` | §3.4.3 |
+| Geoparsing and disambiguation | `scripts/part5_geoparsing_and_mapping.py`, `analysis/export_geoparse_errors.py` | §4.5 |
+| Threshold sensitivity; gazetteer drift | `analysis/sensitivity_analysis_v4.py`, `analysis/nominatim_drift_check.py` | §4.6 |
+| End-to-end replay and map | `analysis/run_simulation.py` (wraps `scripts/part6_simulation.py`) | §4.7 |
+| Clustering sensitivity | `analysis/dbscan_sensitivity.py` | §4.7 |
 
-> **LLM baselines:** require an Anthropic API key (`ANTHROPIC_API_KEY`) and a DeepInfra API key (`DEEPINFRA_API_KEY`) set as environment variables. Expected cost: < $1 for the full test-set evaluation.
+`analysis/iaa_compute.py` and `analysis/leakage_analysis.py` reproduce `data/IAA_results.json` and `data/leakage_analysis_*` exactly from `data/master_cleaned_dataset.csv`; `analysis/dbscan_sensitivity.py` reproduces `data/dbscan_sensitivity.csv` from `data/fire_events_geoparsed.csv`.
 
 ---
 
-## Data Availability
+## Data provenance, ethics and terms of use
 
-The gold-standard annotation datasets, inter-annotator agreement materials, and all analysis scripts are archived at:
-
-> Lazanas, A.; Samaras, M. alexlas73/greek-wildfire-detection-pipeline (v2.0). *Zenodo* **2026**. https://doi.org/10.5281/zenodo.21982027
+- Posts were collected by keyword (fire-related Greek terms and Greeklish hashtags), not by account, from public X posts, using Twikit.
+- The release contains post text so that the corpus is usable as a benchmark; usernames are not distributed and in-text mentions are masked. Post text remains the property of its authors and is provided for **non-commercial research use only**. Authors of posts who wish their post removed can contact the corresponding author; removed posts will be dropped in the next release.
+- Geolocation is derived from toponyms in the text, never from device positions.
+- The demonstration map shows source posts for research purposes; an operational deployment would not (paper §5.5).
 
 ---
 
 ## Citation
 
-If you use this code or data in your research, please cite:
-
 ```bibtex
-@article{lazanas2026citizens,
-  title     = {Citizens as Sensors: Fine-Tuned Transformers for Greek-Language
-               Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping},
-  author    = {Lazanas, Alexis and Samaras, Marios},
+@article{lazanas2026people,
+  title     = {People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time
+               Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media},
+  author    = {Lazanas, Alexios and Samaras, Marios},
   journal   = {AI},
   publisher = {MDPI},
   year      = {2026},
-  doi       = {# Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
+  note      = {under review}
+}
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-
-End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
-
-> **Associated paper:** Lazanas, A.; Samaras, M. Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping. *AI* 2026 (MDPI, JCR Q1). https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Pipeline Overview
-
-```
-Raw X posts
-    │
-    ▼
-Part 1 · Scraping          (Twikit)
-    │
-    ▼
-Part 2 · Text Cleaning     (4 levels: light → advanced → hard)
-    │
-    ▼
-Part 3 · Binary Classification    GreekBERT  →  F2 = 0.911
-    │         (active fire?)
-    ▼
-Part 4 · Multilabel Classification    XLM-RoBERTa  →  Macro-F1 = 0.874
-    │         (wildland / urban / mixed)
-    ▼
-Part 5 · Geoparsing & Mapping   NER → Nominatim → spatiotemporal disambiguation
-    │         →  DBSCAN clustering (ε = 15 km)  →  Folium interactive map
-    ▼
-Part 6 · Simulation        (end-to-end demo on Varnavas/Attica 2024 fire)
-```
-
----
-
-## Repository Structure
-
-```
-greek-wildfire-detection-pipeline/
-├── part1_x_scraping.py               # X (Twitter) post collection via Twikit
-├── part2_text_cleaning.py            # Greek text normalisation (4 levels)
-├── part3_binary_classification.py    # Active-fire binary classifier (GreekBERT / SVM)
-├── part4_multilabel_classification.py# Fire-type multilabel classifier (XLM-RoBERTa / SVM)
-├── part5_geoparsing_and_mapping.py   # NER + disambiguation + DBSCAN + Folium map
-├── part6_simulation.py               # End-to-end simulation on unlabelled posts
-├── data/
-│   ├── tweet_ids.txt                 # Post IDs for corpus re-hydration (raw text not distributed)
-│   ├── ground_truth_geoparsing.xlsx  # 147-item geoparsing gold standard
-│   ├── ground_truth_classification.xlsx  # Post-level binary + multilabel labels
-│   ├── IAA_results.json              # Inter-annotator agreement scores
-│   ├── IAA_adjudication.json         # Adjudication outcomes
-│   └── ANNOTATION_GUIDELINES.md     # Full annotation protocol
-└── README.md
-```
-
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
-
----
-
-## Pre-trained Models
-
-Both fine-tuned models are publicly available on Hugging Face:
-
-| Task | Model | Hugging Face ID |
-|---|---|---|
-| Binary (active fire?) | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
-| Multilabel (fire type) | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
-
----
-
-## Requirements
-
-Python 3.10+ recommended. Install all dependencies:
-
-```bash
-pip install twikit transformers datasets torch scikit-learn \
-            gr-nlp-toolkit spacy geopy folium emoji \
-            pandas openpyxl matplotlib
-python -m spacy download el_core_news_lg
-```
-
-> **GPU:** Parts 3, 4, and 6 run substantially faster on a CUDA-enabled GPU. The pipeline is functional on CPU (Parts 3 and 4 take ~0.5 s/post on CPU; ~5–10× faster on GPU).
-
----
-
-## Quickstart: Reproduce the Paper's Results
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/alexlas73/greek-wildfire-detection-pipeline.git
-cd greek-wildfire-detection-pipeline
-```
-
-### 2. Re-hydrate the corpus (optional)
-
-If you have X API access, re-collect the post text using the IDs in `data/tweet_ids.txt`. Place the resulting dataset at `data/master_cleaned_dataset.xlsx` (see column schema in the annotation guidelines).
-
-### 3. Run binary classification
-
-```bash
-python part3_binary_classification.py
-```
-
-Trains and evaluates GreekBERT and baseline SVMs on the 70/15/15 stratified split (seed 42). Outputs per-seed metrics across 5 runs.
-
-### 4. Run multilabel classification
-
-```bash
-python part4_multilabel_classification.py
-```
-
-Trains and evaluates XLM-RoBERTa on active-fire posts only, with per-label threshold tuning (seed 789).
-
-### 5. Run geoparsing and mapping
-
-```bash
-python part5_geoparsing_and_mapping.py
-```
-
-Evaluates geoparsing on the 147-item gold standard; generates the interactive Folium map (`fire_events_map.html`).
-
-### 6. Run the end-to-end simulation
-
-```bash
-python part6_simulation.py
-```
-
-Processes the August 2024 Attica fire dataset end-to-end and produces `fire_events_geoparsed.csv` and `fire_events_map.html`.
-
----
-
-## Reproducing Additional Experiments
-
-The following analysis scripts reproduce the paper's supplementary experiments. Run them from the repo root after completing Steps 3–5 above:
-
-| Script | Experiment | Section |
-|---|---|---|
-| `analysis/iaa_compute.py` | Inter-annotator agreement (Cohen's κ, Krippendorff's α) | §4.1 |
-| `analysis/leakage_analysis.py` | Near-duplicate leakage check across splits | §3.4.3 |
-| `analysis/sensitivity_analysis.py` | One-at-a-time threshold sensitivity sweep | §4.6 |
-| `analysis/nominatim_drift_check.py` | Gazetteer drift quantification | §4.6 |
-| `analysis/llm_baselines.py` | LLM baseline comparison (Claude + Llama) | §4.4 |
-| `analysis/latency_benchmark.py` | Per-post inference latency measurement | §4.4 |
-
-> **LLM baselines:** require an Anthropic API key (`ANTHROPIC_API_KEY`) and a DeepInfra API key (`DEEPINFRA_API_KEY`) set as environment variables. Expected cost: < $1 for the full test-set evaluation.
-
----
-
-## Data Availability
-
-The gold-standard annotation datasets, inter-annotator agreement materials, and all analysis scripts are archived at:
-
-> Lazanas, A.; Samaras, M. alexlas73/greek-wildfire-detection-pipeline (v2.0). *Zenodo* **2026**. https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Citation
-
-If you use this code or data in your research, please cite:
-
-```bibtex
-@article{lazanas2026citizens,
-  title     = {Citizens as Sensors: Fine-Tuned Transformers for Greek-Language
-               Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping},
-  author    = {Lazanas, Alexis and Samaras, Marios},
-  journal   = {AI},
-  publisher = {MDPI},
+@software{lazanas2026pipeline,
+  title     = {greek-wildfire-detection-pipeline (v2.2)},
+  author    = {Lazanas, Alexios and Samaras, Marios},
   year      = {2026},
-  doi       = {# Citizens as Sensors: Greek-Language Wildfire Detection Pipeline
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-
-End-to-end NLP pipeline that transforms raw Greek social-media posts into a live, geolocated wildfire map — no human intervention at inference time.
-
-> **Associated paper:** Lazanas, A.; Samaras, M. Citizens as Sensors: Fine-Tuned Transformers for Greek-Language Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping. *AI* 2026 (MDPI, JCR Q1). https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Pipeline Overview
-
-```
-Raw X posts
-    │
-    ▼
-Part 1 · Scraping          (Twikit)
-    │
-    ▼
-Part 2 · Text Cleaning     (4 levels: light → advanced → hard)
-    │
-    ▼
-Part 3 · Binary Classification    GreekBERT  →  F2 = 0.911
-    │         (active fire?)
-    ▼
-Part 4 · Multilabel Classification    XLM-RoBERTa  →  Macro-F1 = 0.874
-    │         (wildland / urban / mixed)
-    ▼
-Part 5 · Geoparsing & Mapping   NER → Nominatim → spatiotemporal disambiguation
-    │         →  DBSCAN clustering (ε = 15 km)  →  Folium interactive map
-    ▼
-Part 6 · Simulation        (end-to-end demo on Varnavas/Attica 2024 fire)
-```
-
----
-
-## Repository Structure
-
-```
-greek-wildfire-detection-pipeline/
-├── part1_x_scraping.py               # X (Twitter) post collection via Twikit
-├── part2_text_cleaning.py            # Greek text normalisation (4 levels)
-├── part3_binary_classification.py    # Active-fire binary classifier (GreekBERT / SVM)
-├── part4_multilabel_classification.py# Fire-type multilabel classifier (XLM-RoBERTa / SVM)
-├── part5_geoparsing_and_mapping.py   # NER + disambiguation + DBSCAN + Folium map
-├── part6_simulation.py               # End-to-end simulation on unlabelled posts
-├── data/
-│   ├── tweet_ids.txt                 # Post IDs for corpus re-hydration (raw text not distributed)
-│   ├── ground_truth_geoparsing.xlsx  # 147-item geoparsing gold standard
-│   ├── ground_truth_classification.xlsx  # Post-level binary + multilabel labels
-│   ├── IAA_results.json              # Inter-annotator agreement scores
-│   ├── IAA_adjudication.json         # Adjudication outcomes
-│   └── ANNOTATION_GUIDELINES.md     # Full annotation protocol
-└── README.md
-```
-
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
-
----
-
-## Pre-trained Models
-
-Both fine-tuned models are publicly available on Hugging Face:
-
-| Task | Model | Hugging Face ID |
-|---|---|---|
-| Binary (active fire?) | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
-| Multilabel (fire type) | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
-
----
-
-## Requirements
-
-Python 3.10+ recommended. Install all dependencies:
-
-```bash
-pip install twikit transformers datasets torch scikit-learn \
-            gr-nlp-toolkit spacy geopy folium emoji \
-            pandas openpyxl matplotlib
-python -m spacy download el_core_news_lg
-```
-
-> **GPU:** Parts 3, 4, and 6 run substantially faster on a CUDA-enabled GPU. The pipeline is functional on CPU (Parts 3 and 4 take ~0.5 s/post on CPU; ~5–10× faster on GPU).
-
----
-
-## Quickstart: Reproduce the Paper's Results
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/alexlas73/greek-wildfire-detection-pipeline.git
-cd greek-wildfire-detection-pipeline
-```
-
-### 2. Re-hydrate the corpus (optional)
-
-If you have X API access, re-collect the post text using the IDs in `data/tweet_ids.txt`. Place the resulting dataset at `data/master_cleaned_dataset.xlsx` (see column schema in the annotation guidelines).
-
-### 3. Run binary classification
-
-```bash
-python part3_binary_classification.py
-```
-
-Trains and evaluates GreekBERT and baseline SVMs on the 70/15/15 stratified split (seed 42). Outputs per-seed metrics across 5 runs.
-
-### 4. Run multilabel classification
-
-```bash
-python part4_multilabel_classification.py
-```
-
-Trains and evaluates XLM-RoBERTa on active-fire posts only, with per-label threshold tuning (seed 789).
-
-### 5. Run geoparsing and mapping
-
-```bash
-python part5_geoparsing_and_mapping.py
-```
-
-Evaluates geoparsing on the 147-item gold standard; generates the interactive Folium map (`fire_events_map.html`).
-
-### 6. Run the end-to-end simulation
-
-```bash
-python part6_simulation.py
-```
-
-Processes the August 2024 Attica fire dataset end-to-end and produces `fire_events_geoparsed.csv` and `fire_events_map.html`.
-
----
-
-## Reproducing Additional Experiments
-
-The following analysis scripts reproduce the paper's supplementary experiments. Run them from the repo root after completing Steps 3–5 above:
-
-| Script | Experiment | Section |
-|---|---|---|
-| `analysis/iaa_compute.py` | Inter-annotator agreement (Cohen's κ, Krippendorff's α) | §4.1 |
-| `analysis/leakage_analysis.py` | Near-duplicate leakage check across splits | §3.4.3 |
-| `analysis/sensitivity_analysis.py` | One-at-a-time threshold sensitivity sweep | §4.6 |
-| `analysis/nominatim_drift_check.py` | Gazetteer drift quantification | §4.6 |
-| `analysis/llm_baselines.py` | LLM baseline comparison (Claude + Llama) | §4.4 |
-| `analysis/latency_benchmark.py` | Per-post inference latency measurement | §4.4 |
-
-> **LLM baselines:** require an Anthropic API key (`ANTHROPIC_API_KEY`) and a DeepInfra API key (`DEEPINFRA_API_KEY`) set as environment variables. Expected cost: < $1 for the full test-set evaluation.
-
----
-
-## Data Availability
-
-The gold-standard annotation datasets, inter-annotator agreement materials, and all analysis scripts are archived at:
-
-> Lazanas, A.; Samaras, M. alexlas73/greek-wildfire-detection-pipeline (v2.0). *Zenodo* **2026**. https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Citation
-
-If you use this code or data in your research, please cite:
-
-```bibtex
-@article{lazanas2026citizens,
-  title     = {Citizens as Sensors: Fine-Tuned Transformers for Greek-Language
-               Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping},
-  author    = {Lazanas, Alexis and Samaras, Marios},
-  journal   = {AI},
-  publisher = {MDPI},
-  year      = {2026},
-  doi       = {10.5281/zenodo.21982027}
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21991636}
 }
 ```
 
@@ -537,408 +186,9 @@ If you use this code or data in your research, please cite:
 
 ## Authors
 
-- **Alexis Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras, Rion-Patras 26500, Greece ([alexlas73@upatras.gr](mailto:alexlas73@upatras.gr)) — *corresponding author*
+- **Alexios Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras — alexlas@upatras.gr (corresponding author)
 - **Marios Samaras** — Department of Mechanical Engineering and Aeronautics, University of Patras
-
----
 
 ## License
 
-This repository is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence. You are free to share and adapt the material for any purpose, provided appropriate credit is given.
-
-}
-}
-```
-
----
-
-## Authors
-
-- **Alexis Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras, Rion-Patras 26500, Greece ([alexlas73@upatras.gr](mailto:alexlas73@upatras.gr)) — *corresponding author*
-- **Marios Samaras** — Department of Mechanical Engineering and Aeronautics, University of Patras
-
----
-
-## License
-
-This repository is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence. You are free to share and adapt the material for any purpose, provided appropriate credit is given.
-
-}
-}
-```
-
----
-
-## Authors
-
-- **Alexis Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras, Rion-Patras 26500, Greece ([alexlas73@upatras.gr](mailto:alexlas73@upatras.gr)) — *corresponding author*
-- **Marios Samaras** — Department of Mechanical Engineering and Aeronautics, University of Patras
-
----
-
-## License
-
-This repository is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence. You are free to share and adapt the material for any purpose, provided appropriate credit is given.
-
-
-
----
-
-## Pipeline Overview
-
-```
-Raw X posts
-    │
-    ▼
-Part 1 · Scraping          (Twikit)
-    │
-    ▼
-Part 2 · Text Cleaning     (4 levels: light → advanced → hard)
-    │
-    ▼
-Part 3 · Binary Classification    GreekBERT  →  F2 = 0.911
-    │         (active fire?)
-    ▼
-Part 4 · Multilabel Classification    XLM-RoBERTa  →  Macro-F1 = 0.874
-    │         (wildland / urban / mixed)
-    ▼
-Part 5 · Geoparsing & Mapping   NER → Nominatim → spatiotemporal disambiguation
-    │         →  DBSCAN clustering (ε = 15 km)  →  Folium interactive map
-    ▼
-Part 6 · Simulation        (end-to-end demo on Varnavas/Attica 2024 fire)
-```
-
----
-
-## Repository Structure
-
-```
-greek-wildfire-detection-pipeline/
-├── part1_x_scraping.py               # X (Twitter) post collection via Twikit
-├── part2_text_cleaning.py            # Greek text normalisation (4 levels)
-├── part3_binary_classification.py    # Active-fire binary classifier (GreekBERT / SVM)
-├── part4_multilabel_classification.py# Fire-type multilabel classifier (XLM-RoBERTa / SVM)
-├── part5_geoparsing_and_mapping.py   # NER + disambiguation + DBSCAN + Folium map
-├── part6_simulation.py               # End-to-end simulation on unlabelled posts
-├── data/
-│   ├── tweet_ids.txt                 # Post IDs for corpus re-hydration (raw text not distributed)
-│   ├── ground_truth_geoparsing.xlsx  # 147-item geoparsing gold standard
-│   ├── ground_truth_classification.xlsx  # Post-level binary + multilabel labels
-│   ├── IAA_results.json              # Inter-annotator agreement scores
-│   ├── IAA_adjudication.json         # Adjudication outcomes
-│   └── ANNOTATION_GUIDELINES.md     # Full annotation protocol
-└── README.md
-```
-
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
-
----
-
-## Pre-trained Models
-
-Both fine-tuned models are publicly available on Hugging Face:
-
-| Task | Model | Hugging Face ID |
-|---|---|---|
-| Binary (active fire?) | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
-| Multilabel (fire type) | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
-
----
-
-## Requirements
-
-Python 3.10+ recommended. Install all dependencies:
-
-```bash
-pip install twikit transformers datasets torch scikit-learn \
-            gr-nlp-toolkit spacy geopy folium emoji \
-            pandas openpyxl matplotlib
-python -m spacy download el_core_news_lg
-```
-
-> **GPU:** Parts 3, 4, and 6 run substantially faster on a CUDA-enabled GPU. The pipeline is functional on CPU (Parts 3 and 4 take ~0.5 s/post on CPU; ~5–10× faster on GPU).
-
----
-
-## Quickstart: Reproduce the Paper's Results
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/alexlas73/greek-wildfire-detection-pipeline.git
-cd greek-wildfire-detection-pipeline
-```
-
-### 2. Re-hydrate the corpus (optional)
-
-If you have X API access, re-collect the post text using the IDs in `data/tweet_ids.txt`. Place the resulting dataset at `data/master_cleaned_dataset.xlsx` (see column schema in the annotation guidelines).
-
-### 3. Run binary classification
-
-```bash
-python part3_binary_classification.py
-```
-
-Trains and evaluates GreekBERT and baseline SVMs on the 70/15/15 stratified split (seed 42). Outputs per-seed metrics across 5 runs.
-
-### 4. Run multilabel classification
-
-```bash
-python part4_multilabel_classification.py
-```
-
-Trains and evaluates XLM-RoBERTa on active-fire posts only, with per-label threshold tuning (seed 789).
-
-### 5. Run geoparsing and mapping
-
-```bash
-python part5_geoparsing_and_mapping.py
-```
-
-Evaluates geoparsing on the 147-item gold standard; generates the interactive Folium map (`fire_events_map.html`).
-
-### 6. Run the end-to-end simulation
-
-```bash
-python part6_simulation.py
-```
-
-Processes the August 2024 Attica fire dataset end-to-end and produces `fire_events_geoparsed.csv` and `fire_events_map.html`.
-
----
-
-## Reproducing Additional Experiments
-
-The following analysis scripts reproduce the paper's supplementary experiments. Run them from the repo root after completing Steps 3–5 above:
-
-| Script | Experiment | Section |
-|---|---|---|
-| `analysis/iaa_compute.py` | Inter-annotator agreement (Cohen's κ, Krippendorff's α) | §4.1 |
-| `analysis/leakage_analysis.py` | Near-duplicate leakage check across splits | §3.4.3 |
-| `analysis/sensitivity_analysis.py` | One-at-a-time threshold sensitivity sweep | §4.6 |
-| `analysis/nominatim_drift_check.py` | Gazetteer drift quantification | §4.6 |
-| `analysis/llm_baselines.py` | LLM baseline comparison (Claude + Llama) | §4.4 |
-| `analysis/latency_benchmark.py` | Per-post inference latency measurement | §4.4 |
-
-> **LLM baselines:** require an Anthropic API key (`ANTHROPIC_API_KEY`) and a DeepInfra API key (`DEEPINFRA_API_KEY`) set as environment variables. Expected cost: < $1 for the full test-set evaluation.
-
----
-
-## Data Availability
-
-The gold-standard annotation datasets, inter-annotator agreement materials, and all analysis scripts are archived at:
-
-> Lazanas, A.; Samaras, M. alexlas73/greek-wildfire-detection-pipeline (v2.0). *Zenodo* **2026**. https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Citation
-
-If you use this code or data in your research, please cite:
-
-```bibtex
-@article{lazanas2026citizens,
-  title     = {Citizens as Sensors: Fine-Tuned Transformers for Greek-Language
-               Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping},
-  author    = {Lazanas, Alexis and Samaras, Marios},
-  journal   = {AI},
-  publisher = {MDPI},
-  year      = {2026},
-  doi       = {10.5281/zenodo.21982027}
-}
-```
-
----
-
-## Authors
-
-- **Alexis Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras, Rion-Patras 26500, Greece ([alexlas73@upatras.gr](mailto:alexlas73@upatras.gr)) — *corresponding author*
-- **Marios Samaras** — Department of Mechanical Engineering and Aeronautics, University of Patras
-
----
-
-## License
-
-This repository is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence. You are free to share and adapt the material for any purpose, provided appropriate credit is given.
-
-
-
----
-
-## Pipeline Overview
-
-```
-Raw X posts
-    │
-    ▼
-Part 1 · Scraping          (Twikit)
-    │
-    ▼
-Part 2 · Text Cleaning     (4 levels: light → advanced → hard)
-    │
-    ▼
-Part 3 · Binary Classification    GreekBERT  →  F2 = 0.911
-    │         (active fire?)
-    ▼
-Part 4 · Multilabel Classification    XLM-RoBERTa  →  Macro-F1 = 0.874
-    │         (wildland / urban / mixed)
-    ▼
-Part 5 · Geoparsing & Mapping   NER → Nominatim → spatiotemporal disambiguation
-    │         →  DBSCAN clustering (ε = 15 km)  →  Folium interactive map
-    ▼
-Part 6 · Simulation        (end-to-end demo on Varnavas/Attica 2024 fire)
-```
-
----
-
-## Repository Structure
-
-```
-greek-wildfire-detection-pipeline/
-├── part1_x_scraping.py               # X (Twitter) post collection via Twikit
-├── part2_text_cleaning.py            # Greek text normalisation (4 levels)
-├── part3_binary_classification.py    # Active-fire binary classifier (GreekBERT / SVM)
-├── part4_multilabel_classification.py# Fire-type multilabel classifier (XLM-RoBERTa / SVM)
-├── part5_geoparsing_and_mapping.py   # NER + disambiguation + DBSCAN + Folium map
-├── part6_simulation.py               # End-to-end simulation on unlabelled posts
-├── data/
-│   ├── tweet_ids.txt                 # Post IDs for corpus re-hydration (raw text not distributed)
-│   ├── ground_truth_geoparsing.xlsx  # 147-item geoparsing gold standard
-│   ├── ground_truth_classification.xlsx  # Post-level binary + multilabel labels
-│   ├── IAA_results.json              # Inter-annotator agreement scores
-│   ├── IAA_adjudication.json         # Adjudication outcomes
-│   └── ANNOTATION_GUIDELINES.md     # Full annotation protocol
-└── README.md
-```
-
-> **Note on raw tweet text:** In accordance with the X Developer Agreement and Policy, full post text is not redistributed. The file `tweet_ids.txt` contains the post identifiers; you can re-collect the original text using the [Academic Research Product Track](https://developer.twitter.com/en/products/twitter-api/academic-research) or a compatible scraping tool.
-
----
-
-## Pre-trained Models
-
-Both fine-tuned models are publicly available on Hugging Face:
-
-| Task | Model | Hugging Face ID |
-|---|---|---|
-| Binary (active fire?) | GreekBERT | [`mariossmrs/greek-bert-fire-detection-binary-classification`](https://huggingface.co/mariossmrs/greek-bert-fire-detection-binary-classification) |
-| Multilabel (fire type) | XLM-RoBERTa | [`mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification`](https://huggingface.co/mariossmrs/greek-xlm-roberta-fire-type-multilabel-classification) |
-
----
-
-## Requirements
-
-Python 3.10+ recommended. Install all dependencies:
-
-```bash
-pip install twikit transformers datasets torch scikit-learn \
-            gr-nlp-toolkit spacy geopy folium emoji \
-            pandas openpyxl matplotlib
-python -m spacy download el_core_news_lg
-```
-
-> **GPU:** Parts 3, 4, and 6 run substantially faster on a CUDA-enabled GPU. The pipeline is functional on CPU (Parts 3 and 4 take ~0.5 s/post on CPU; ~5–10× faster on GPU).
-
----
-
-## Quickstart: Reproduce the Paper's Results
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/alexlas73/greek-wildfire-detection-pipeline.git
-cd greek-wildfire-detection-pipeline
-```
-
-### 2. Re-hydrate the corpus (optional)
-
-If you have X API access, re-collect the post text using the IDs in `data/tweet_ids.txt`. Place the resulting dataset at `data/master_cleaned_dataset.xlsx` (see column schema in the annotation guidelines).
-
-### 3. Run binary classification
-
-```bash
-python part3_binary_classification.py
-```
-
-Trains and evaluates GreekBERT and baseline SVMs on the 70/15/15 stratified split (seed 42). Outputs per-seed metrics across 5 runs.
-
-### 4. Run multilabel classification
-
-```bash
-python part4_multilabel_classification.py
-```
-
-Trains and evaluates XLM-RoBERTa on active-fire posts only, with per-label threshold tuning (seed 789).
-
-### 5. Run geoparsing and mapping
-
-```bash
-python part5_geoparsing_and_mapping.py
-```
-
-Evaluates geoparsing on the 147-item gold standard; generates the interactive Folium map (`fire_events_map.html`).
-
-### 6. Run the end-to-end simulation
-
-```bash
-python part6_simulation.py
-```
-
-Processes the August 2024 Attica fire dataset end-to-end and produces `fire_events_geoparsed.csv` and `fire_events_map.html`.
-
----
-
-## Reproducing Additional Experiments
-
-The following analysis scripts reproduce the paper's supplementary experiments. Run them from the repo root after completing Steps 3–5 above:
-
-| Script | Experiment | Section |
-|---|---|---|
-| `analysis/iaa_compute.py` | Inter-annotator agreement (Cohen's κ, Krippendorff's α) | §4.1 |
-| `analysis/leakage_analysis.py` | Near-duplicate leakage check across splits | §3.4.3 |
-| `analysis/sensitivity_analysis.py` | One-at-a-time threshold sensitivity sweep | §4.6 |
-| `analysis/nominatim_drift_check.py` | Gazetteer drift quantification | §4.6 |
-| `analysis/llm_baselines.py` | LLM baseline comparison (Claude + Llama) | §4.4 |
-| `analysis/latency_benchmark.py` | Per-post inference latency measurement | §4.4 |
-
-> **LLM baselines:** require an Anthropic API key (`ANTHROPIC_API_KEY`) and a DeepInfra API key (`DEEPINFRA_API_KEY`) set as environment variables. Expected cost: < $1 for the full test-set evaluation.
-
----
-
-## Data Availability
-
-The gold-standard annotation datasets, inter-annotator agreement materials, and all analysis scripts are archived at:
-
-> Lazanas, A.; Samaras, M. alexlas73/greek-wildfire-detection-pipeline (v2.0). *Zenodo* **2026**. https://doi.org/10.5281/zenodo.21982027
-
----
-
-## Citation
-
-If you use this code or data in your research, please cite:
-
-```bibtex
-@article{lazanas2026citizens,
-  title     = {Citizens as Sensors: Fine-Tuned Transformers for Greek-Language
-               Wildfire Detection, Toponym Disambiguation, and Real-Time Mapping},
-  author    = {Lazanas, Alexis and Samaras, Marios},
-  journal   = {AI},
-  publisher = {MDPI},
-  year      = {2026},
-  doi       = {10.5281/zenodo.21982027}
-}
-```
-
----
-
-## Authors
-
-- **Alexis Lazanas** — Department of Mechanical Engineering and Aeronautics, University of Patras, Rion-Patras 26500, Greece ([alexlas73@upatras.gr](mailto:alexlas73@upatras.gr)) — *corresponding author*
-- **Marios Samaras** — Department of Mechanical Engineering and Aeronautics, University of Patras
-
----
-
-## License
-
-This repository is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence. You are free to share and adapt the material for any purpose, provided appropriate credit is given.
-
+Code, annotations, guidelines and evaluation outputs: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Post text: see *Data provenance, ethics and terms of use*.
