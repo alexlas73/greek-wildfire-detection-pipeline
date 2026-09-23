@@ -1,0 +1,24 @@
+{
+  "framing": "(a) reliability audit; models trained on original annotator-1 labels",
+  "binary": {
+    "disagreements": 4,
+    "resolved_A1": 4,
+    "resolved_A2": 0,
+    "gold_changes": 0,
+    "A1_accuracy": 1.0,
+    "A2_accuracy": 0.99
+  },
+  "multilabel": {
+    "disagreements": 6,
+    "resolved_A1": 5,
+    "resolved_A2": 1,
+    "gold_changes": 1,
+    "A1_accuracy": 0.9967,
+    "A2_accuracy": 0.9833
+  },
+  "total_audited": 700,
+  "labels_revised": 1,
+  "pct_revised": 0.14,
+  "revised_rule_mixed": "fire affecting, threatening or reaching the built environment, including proximity to infrastructure and 112 evacuation alerts for inhabited areas",
+  "cyprus_rule": "fires outside Greece (incl. Cyprus) are NOT active-fire-related for this corpus"
+}

@@ -1,0 +1,127 @@
+{
+  "binary": {
+    "n": 400,
+    "kappa": 0.9777,
+    "kappa_ci95": [
+      0.9531,
+      0.9946
+    ],
+    "krippendorff_alpha": 0.9777,
+    "raw_agreement": 0.99,
+    "n_disagreements": 4,
+    "confusion_matrix_A1_rows_A2_cols": [
+      [
+        262,
+        4
+      ],
+      [
+        0,
+        134
+      ]
+    ],
+    "interpretation": "almost perfect"
+  },
+  "multilabel": {
+    "n": 300,
+    "per_label": {
+      "is_wildland": {
+        "kappa": 0.9867,
+        "kappa_ci95": [
+          0.9665,
+          1.0
+        ],
+        "krippendorff_alpha": 0.9867,
+        "raw_agreement": 0.9933,
+        "n_disagreements": 2,
+        "interpretation": "almost perfect"
+      },
+      "is_urban": {
+        "kappa": 0.9733,
+        "kappa_ci95": [
+          0.9464,
+          0.9933
+        ],
+        "krippendorff_alpha": 0.9734,
+        "raw_agreement": 0.9867,
+        "n_disagreements": 4,
+        "interpretation": "almost perfect"
+      }
+    },
+    "four_state": {
+      "kappa": 0.9733,
+      "kappa_ci95": [
+        0.9509,
+        0.9911
+      ],
+      "krippendorff_alpha": 0.9734,
+      "exact_match_ratio": 0.98,
+      "confusion_matrix": [
+        [
+          75,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          74,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          73,
+          2
+        ],
+        [
+          0,
+          3,
+          0,
+          72
+        ]
+      ],
+      "class_order": [
+        "unidentified",
+        "wildland",
+        "urban",
+        "mixed"
+      ],
+      "per_class": {
+        "unidentified": {
+          "n": 75,
+          "matched": 1.0
+        },
+        "wildland": {
+          "n": 75,
+          "matched": 0.9867
+        },
+        "urban": {
+          "n": 75,
+          "matched": 0.9733
+        },
+        "mixed": {
+          "n": 75,
+          "matched": 0.96
+        }
+      },
+      "interpretation": "almost perfect"
+    },
+    "mean_per_label_alpha": 0.98
+  },
+  "geoparsing": {
+    "n": 147,
+    "n_none_A1": 2,
+    "n_none_A2": 0,
+    "none_decision_agreement": 0.9864,
+    "kappa_locatable_decision": 0.0,
+    "exact_normalised_toponym_match": 0.2517,
+    "toponym_match_with_containment": 0.6871,
+    "n_both_coordinates": 139,
+    "within_1km": 0.223,
+    "within_5km": 0.4676,
+    "within_10km": 0.6259,
+    "median_distance_km": 6.645,
+    "mean_distance_km": 24.987
+  }
+}

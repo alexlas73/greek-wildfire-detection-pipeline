@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "binary": {
+      "n": 3277,
+      "exact_rows": 70,
+      "exact_groups": 34,
+      "exact_groups_spanning_splits": 20
+    },
+    "multilabel": {
+      "n": 1100,
+      "exact_rows": 39,
+      "exact_groups": 19,
+      "exact_groups_spanning_splits": 8
+    }
+  },
+  "rows": [
+    {
+      "task": "BINARY TASK (seed 42, stratify=is_fire)",
+      "threshold": 0.95,
+      "n_docs": 3277,
+      "duplicate_pairs": 123,
+      "cross_split_pairs": 52,
+      "pairs_involving_test": 24,
+      "docs_affected": 78,
+      "pct_of_corpus": 2.38
+    },
+    {
+      "task": "BINARY TASK (seed 42, stratify=is_fire)",
+      "threshold": 0.9,
+      "n_docs": 3277,
+      "duplicate_pairs": 280,
+      "cross_split_pairs": 123,
+      "pairs_involving_test": 52,
+      "docs_affected": 119,
+      "pct_of_corpus": 3.63
+    },
+    {
+      "task": "BINARY TASK (seed 42, stratify=is_fire)",
+      "threshold": 0.85,
+      "n_docs": 3277,
+      "duplicate_pairs": 402,
+      "cross_split_pairs": 170,
+      "pairs_involving_test": 67,
+      "docs_affected": 160,
+      "pct_of_corpus": 4.88
+    },
+    {
+      "task": "BINARY TASK (seed 42, stratify=is_fire)",
+      "threshold": 0.8,
+      "n_docs": 3277,
+      "duplicate_pairs": 588,
+      "cross_split_pairs": 254,
+      "pairs_involving_test": 105,
+      "docs_affected": 221,
+      "pct_of_corpus": 6.74
+    },
+    {
+      "task": "MULTILABEL TASK (seed 789, stratify=4-state combo)",
+      "threshold": 0.95,
+      "n_docs": 1100,
+      "duplicate_pairs": 52,
+      "cross_split_pairs": 26,
+      "pairs_involving_test": 14,
+      "docs_affected": 40,
+      "pct_of_corpus": 3.64
+    },
+    {
+      "task": "MULTILABEL TASK (seed 789, stratify=4-state combo)",
+      "threshold": 0.9,
+      "n_docs": 1100,
+      "duplicate_pairs": 92,
+      "cross_split_pairs": 54,
+      "pairs_involving_test": 30,
+      "docs_affected": 78,
+      "pct_of_corpus": 7.09
+    },
+    {
+      "task": "MULTILABEL TASK (seed 789, stratify=4-state combo)",
+      "threshold": 0.85,
+      "n_docs": 1100,
+      "duplicate_pairs": 137,
+      "cross_split_pairs": 74,
+      "pairs_involving_test": 41,
+      "docs_affected": 103,
+      "pct_of_corpus": 9.36
+    },
+    {
+      "task": "MULTILABEL TASK (seed 789, stratify=4-state combo)",
+      "threshold": 0.8,
+      "n_docs": 1100,
+      "duplicate_pairs": 213,
+      "cross_split_pairs": 108,
+      "pairs_involving_test": 57,
+      "docs_affected": 131,
+      "pct_of_corpus": 11.91
+    }
+  ]
+}

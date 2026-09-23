@@ -1,0 +1,13 @@
+{
+  "mean_jaccard": 0.8573,
+  "perfect_set_match": 0.58,
+  "mean_recall": 0.7557,
+  "mean_precision": 1.01,
+  "n_tweets": 100,
+  "n_matched_pairs": 99,
+  "within_1km": 0.2828,
+  "within_5km": 0.5152,
+  "within_10km": 0.697,
+  "median_km": 4.187,
+  "mean_km": 9.949
+}

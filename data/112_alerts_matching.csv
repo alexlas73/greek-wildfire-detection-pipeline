@@ -1,0 +1,17 @@
+alert_no,alert_datetime_EEST,alert_datetime_UTC,localities_named,alert_type,earliest_corpus_post_EEST,earliest_stream_post_EEST,first_mention_source,delta_minutes_post_minus_alert,direction,note
+1,2024-08-11 16:48,2024-08-11 13:48,Varnavas,evacuation,2024-08-11 17:31,,corpus,43,after,first 112 message of the incident; corpus post 43 min after
+2,2024-08-11 17:37,2024-08-11 14:37,Varnavas,evacuation,2024-08-11 17:31,,corpus,-6,before,repeat alert for the same locality; delta relative to this alert
+3,2024-08-11 20:30,2024-08-11 17:30,Vranas; Marathon,evacuation,2024-08-11 18:55,,corpus,-95,before,"post: fire approaching homes, Marathon (1.6 h before)"
+4,2024-08-11 21:58,2024-08-11 18:58,Vranas; Marathon,evacuation,2024-08-11 18:55,,corpus,-183,before,repeat alert for the same localities
+5,2024-08-12 04:22,2024-08-12 01:22,Stamata; Rodopoli; Dionysos,evacuation,2024-08-11 22:08,,corpus,-374,before,post: front approaching Stamata (6.2 h before)
+6,2024-08-12 04:42,2024-08-12 01:42,Palaia Penteli; Nea Penteli,evacuation,2024-08-12 05:05,,corpus,23,after,
+7,2024-08-12 04:59,2024-08-12 01:59,Drafi; Dioni; Damarasi,evacuation,2024-08-12 05:05,,corpus,6,after,
+8,2024-08-12 07:22,2024-08-12 04:22,Ntaou Pentelis; Agios Spyridonas,evacuation,,,none,,missed,locality not mentioned in the corpus or in the replayed stream
+9,2024-08-13 05:24,2024-08-13 02:24,Erythros; Nea Makri,evacuation,,2024-08-12 22:05,stream,-439,before,"area-level match (Nea Makri area) in the replayed stream, 7.3 h before"
+10,2024-08-13 14:06,2024-08-13 11:06,Vrilissia; Chalandri,abatement,,2024-08-12 22:04,stream,,n/a,"abatement notice, not an evacuation order; excluded from recall and timing"
+
+"# Source of alerts: 112 Greece (@112Greece) public-warning posts on X, 11-13 August 2024, first post https://x.com/112Greece/status/1822631123660218548"
+"# Corpus = annotated corpus of Section 3.2 (44 posts dated 11-13 Aug 2024); stream = replayed unlabeled stream of 12 Aug 2024 (Section 4.7), 22:04-02:58 EEST"
+# Area-level recall: 9 distinct evacuated localities/groups in alerts 1-9; 8 have geolocated reports in the replayed stream; miss = Ntaou Pentelis (alert 8)
+"# Timing figures reported in Section 4.7 use the first alert per locality: Varnavas +43 min, Marathon -1.6 h, Stamata/Dionysos -6.2 h, Penteli +23 min, Drafi +6 min, Nea Makri -7.3 h (stream)"
+# Negative delta = first public mention preceded the alert; matching is by area name; a post naming an area may report a fire approaching it rather than in it

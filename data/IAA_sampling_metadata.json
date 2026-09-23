@@ -1,0 +1,31 @@
+{
+  "seed": 20260810,
+  "binary": {
+    "n": 400,
+    "strata": {
+      "0": 266,
+      "1": 134
+    },
+    "sampling": "proportional to corpus class balance"
+  },
+  "multilabel": {
+    "n": 300,
+    "per_class": {
+      "wildland": 75,
+      "unidentified": 75,
+      "mixed": 75,
+      "urban": 75
+    },
+    "corpus_per_class": {
+      "unidentified": 392,
+      "urban": 389,
+      "wildland": 233,
+      "mixed": 86
+    },
+    "sampling": "equal allocation; mixed deliberately over-sampled"
+  },
+  "geoparsing": {
+    "n": 147,
+    "sampling": "full gold set"
+  }
+}

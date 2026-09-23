@@ -1,0 +1,9 @@
+task,threshold,n_docs,duplicate_pairs,cross_split_pairs,pairs_involving_test,docs_affected,pct_of_corpus
+"BINARY TASK (seed 42, stratify=is_fire)",0.95,3277,123,52,24,78,2.38
+"BINARY TASK (seed 42, stratify=is_fire)",0.9,3277,280,123,52,119,3.63
+"BINARY TASK (seed 42, stratify=is_fire)",0.85,3277,402,170,67,160,4.88
+"BINARY TASK (seed 42, stratify=is_fire)",0.8,3277,588,254,105,221,6.74
+"MULTILABEL TASK (seed 789, stratify=4-state combo)",0.95,1100,52,26,14,40,3.64
+"MULTILABEL TASK (seed 789, stratify=4-state combo)",0.9,1100,92,54,30,78,7.09
+"MULTILABEL TASK (seed 789, stratify=4-state combo)",0.85,1100,137,74,41,103,9.36
+"MULTILABEL TASK (seed 789, stratify=4-state combo)",0.8,1100,213,108,57,131,11.91
