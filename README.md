@@ -178,7 +178,7 @@ Run everything from the repository root.
   author    = {Lazanas, Alexios and Samaras, Marios},
   year      = {2026},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.21991636}
+  doi       = {10.5281/zenodo.21982026}
 }
 ```
 
