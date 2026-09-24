@@ -4,7 +4,7 @@ type: software
 title: "greek-wildfire-detection-pipeline"
 version: "2.2"
 date-released: "2026-09-24"
-doi: "10.5281/zenodo.21991636"
+doi: "10.5281/zenodo.21982026"
 repository-code: "https://github.com/alexlas73/greek-wildfire-detection-pipeline"
 license: "CC-BY-4.0"
 authors:
