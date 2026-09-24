@@ -1,6 +1,6 @@
 # People as Sensors: Greek-Language Wildfire Detection Pipeline
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21991636.svg)](https://doi.org/10.5281/zenodo.21991636)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21982026.svg)](https://doi.org/10.5281/zenodo.21982026)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 End-to-end, Greek-language NLP pipeline that turns keyword-retrieved, unlabeled X posts into a near-real-time, geolocated wildfire map: active-fire detection → fire-type classification (wildland / urban / mixed) → toponym extraction and spatiotemporal disambiguation → DBSCAN incident clustering → interactive Folium map.
