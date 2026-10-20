@@ -163,25 +163,23 @@ Run everything from the repository root.
 
 ## Citation
 
-```bibtex
-@article{lazanas2026people,
-  title     = {People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time
-               Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media},
-  author    = {Lazanas, Alexios and Samaras, Marios},
-  journal   = {AI},
-  publisher = {MDPI},
-  year      = {2026},
-  note      = {under review}
-}
+If you use this code, data, or the annotated corpus, please cite the article:
 
-@software{lazanas2026pipeline,
-  title     = {greek-wildfire-detection-pipeline (v2.2)},
-  author    = {Lazanas, Alexios and Samaras, Marios},
-  year      = {2026},
-  publisher = {Zenodo},
-  doi       = {10.5281/zenodo.21982026}
+```bibtex
+@article{lazanas2026peopleassensors,
+  author  = {Lazanas, Alexis and Samaras, Marios},
+  title   = {People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media},
+  journal = {AI},
+  year    = {2026},
+  volume  = {7},
+  number  = {10},
+  pages   = {436},
+  doi     = {10.3390/ai7100436},
+  url     = {https://doi.org/10.3390/ai7100436}
 }
 ```
+
+The archived release of this repository is available on Zenodo: https://doi.org/10.5281/zenodo.21982026
 
 ---
 
