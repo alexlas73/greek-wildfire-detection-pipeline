@@ -1,12 +1,13 @@
 # People as Sensors: Greek-Language Wildfire Detection Pipeline
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21982026.svg)](https://doi.org/10.5281/zenodo.21982026)
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Paper DOI](https://img.shields.io/badge/DOI-10.3390%2Fai7100436-blue)](https://doi.org/10.3390/ai7100436)
+[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21982026.svg)](https://doi.org/10.5281/zenodo.21982026)
 
-End-to-end, Greek-language NLP pipeline that turns keyword-retrieved, unlabeled X posts into a near-real-time, geolocated wildfire map: active-fire detection → fire-type classification (wildland / urban / mixed) → toponym extraction and spatiotemporal disambiguation → DBSCAN incident clustering → interactive Folium map.
+This repository accompanies the article published in *AI* (MDPI):
 
-> **Associated paper:** Lazanas, A.; Samaras, M. *People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media.* **AI** (MDPI), 2026, under review.
->
+> Lazanas, A.; Samaras, M. People as Sensors: An End-to-End Deep Learning Framework for Near-Real-Time Wildfire Detection, Classification, and Geospatial Intelligence from Greek Social Media. *AI* **2026**, *7*, 436. https://doi.org/10.3390/ai7100436
+> 
+
 > **Interactive demonstration map (12 August 2024, NE Attica):** https://alexlas73.github.io/FireMap/
 
 **Release v2.2 (September 2026)** adds the material of the revised manuscript: chronological hold-out evaluation (§4.8), DBSCAN sensitivity analysis and comparison with the official 112 warnings (§4.7), near-duplicate leakage analysis (§3.4.3), the full inter-annotator agreement (IAA) package (§3.2.3, §4.1), the annotation guidelines, and a corrected data release (see *Data* below).
